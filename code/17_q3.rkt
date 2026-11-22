@@ -21,3 +21,8 @@
   (if (null? t)
       acc
       (postorder-acc (cadr t) (postorder-acc (caddr t) (cons (car t) acc)))))
+
+(define (print-all-traversals tree)
+  (display (inorder-acc tree '())) (newline)
+  (display (preorder-acc tree '())) (newline)
+  (display (postorder-acc tree '())) (newline))
