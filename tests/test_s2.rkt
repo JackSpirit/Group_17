@@ -19,3 +19,15 @@
 (display (insert-if-short 7 '() 3)) (newline)                        ; expect (7)
 (display (insert-if-short 7 '() 0)) (newline)                        ; expect ()
 (display (insert-if-short 7 '((())) 2)) (newline)                    ; expect (7 (7 (7)))
+
+;; print-insert-result
+;;(needs stdin; run by appending (print-insert-result)
+;; to a copy of the solution and piping the input in):
+;;   42 ((1 2) (3 4 5) (6) ()) 3  -> ((42 1 2) (3 4 5) (42 6) (42))
+;;   0 (((1) 2) (3) ((4 5 6) ())) 3    -> ((0 (0 1) 2) (0 3) (0 (4 5 6) (0)))
+;;   7 () 3                            -> (7)
+;;   7 () 0                            -> ()
+;; ran the following test cases using 
+;;cat 17_q4.rkt > /tmp/g.rkt
+;;echo "(print-insert-result)" >> /tmp/g.rkt
+;;echo "42 ((1 2) (3 4 5) (6) ()) 3" | "/c/Program Files/Racket/Racket.exe" /tmp/g.rkt
