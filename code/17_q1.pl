@@ -68,6 +68,13 @@ clue(8, Solution) :-
     Dept == research,
     Lang \== javascript.
 
+% Clue 9 (P1.c, added so that clues 1 to 9 have exactly one solution).
+% It names no friend; it links two attribute values, like clue 5 does.
+% CLUE 9: The friend whose favorite language is Python prefers the AI project.
+clue(9, Solution) :-
+    memberchk(p(_, _, python, Project), Solution),
+    Project == 'AI'.
+
 %! candidate(-Solution) is nondet.
 %  Declarative reading: Solution is a candidate answer when it lists Alex,
 %  Ben, Carla and Dana in that order and their departments, languages and
@@ -104,10 +111,11 @@ count_solutions(Active, N) :-
 
 %! solve(-Solution) is nondet.
 %  Declarative reading: Solution is a solution of the puzzle when it is a
-%  candidate and clues 1 to 8 all hold in it.
+%  candidate and clues 1 to 9 all hold in it. With clue 9 there is exactly
+%  one such Solution.
 solve(Solution) :-
     candidate(Solution),
-    satisfies_clues([1, 2, 3, 4, 5, 6, 7, 8], Solution).
+    satisfies_clues([1, 2, 3, 4, 5, 6, 7, 8, 9], Solution).
 
 %! print_solution(+Solution) is det.
 %  Declarative reading: prints one line "Name = [Dept, Lang, Project]" for
@@ -117,8 +125,8 @@ print_solution(Solution) :-
            format("~w = [~w, ~w, ~w]~n", [Name, Dept, Lang, Proj])).
 
 %! main is semidet.
-%  Declarative reading: main succeeds after printing the first solution of
-%  clues 1 to 8 as four lines in the order Alex, Ben, Carla, Dana; it fails
+%  Declarative reading: main succeeds after printing the unique solution of
+%  clues 1 to 9 as four lines in the order Alex, Ben, Carla, Dana; it fails
 %  without printing if no solution exists.
 main :-
     once(solve(Solution)),

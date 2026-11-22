@@ -28,11 +28,36 @@ pdf_layout_example([ p('Alex',  research,    python,     'AI'),
 
 %! valid_solution(-Solution) is det.
 %  Declarative reading: Solution is a complete assignment, checked by hand
-%  against clues 1 to 8, in which every clue holds.
+%  against clues 1 to 8, in which every clue holds (solution 1 of 3 in
+%  P1_REPORT.md). Clue 9 is false in it.
 valid_solution([ p('Alex',  design,      java,       'AI'),
                  p('Ben',   development, javascript, web),
                  p('Carla', research,    'c++',      data),
                  p('Dana',  testing,     python,     embedded) ]).
+
+%! unique_solution(-Solution) is det.
+%  Declarative reading: Solution is the only assignment in which clues 1
+%  to 9 all hold (solution 2 of 3 in P1_REPORT.md).
+unique_solution([ p('Alex',  design,      java,       embedded),
+                  p('Ben',   development, javascript, web),
+                  p('Carla', testing,     python,     'AI'),
+                  p('Dana',  research,    'c++',      data) ]).
+
+%! third_solution(-Solution) is det.
+%  Declarative reading: Solution satisfies clues 1 to 8 but not clue 9
+%  (solution 3 of 3 in P1_REPORT.md).
+third_solution([ p('Alex',  testing,     python,     embedded),
+                 p('Ben',   development, javascript, web),
+                 p('Carla', design,      java,       'AI'),
+                 p('Dana',  research,    'c++',      data) ]).
+
+%! clues_1_to_8(-Active) is det.
+%  Declarative reading: Active is the list of clue numbers 1 to 8.
+clues_1_to_8([1, 2, 3, 4, 5, 6, 7, 8]).
+
+%! clues_1_to_9(-Active) is det.
+%  Declarative reading: Active is the list of clue numbers 1 to 9.
+clues_1_to_9([1, 2, 3, 4, 5, 6, 7, 8, 9]).
 
 %! breaks_2_4_7(-Solution) is det.
 %  Declarative reading: Solution is a complete assignment in which
@@ -126,10 +151,20 @@ test(no_quotes_in_output) :-
     main_output(Output),
     assertion(\+ sub_string(Output, _, _, _, "'")).
 
-test(printed_solution_satisfies_clues_1_to_8) :-
+test(printed_solution_satisfies_clues_1_to_9) :-
     main_lines(Lines),
     maplist(parse_line, Lines, Solution),
-    forall(between(1, 8, N), assertion(clue(N, Solution))).
+    forall(between(1, 9, N), assertion(clue(N, Solution))).
+
+test(printed_solution_is_the_unique_solution) :-
+    main_lines(Lines),
+    maplist(parse_line, Lines, Solution),
+    unique_solution(Expected),
+    assertion(Solution == Expected).
+
+test(main_prints_exact_unique_solution) :-
+    main_output(Output),
+    assertion(Output == "Alex = [design, java, embedded]\nBen = [development, javascript, web]\nCarla = [testing, python, AI]\nDana = [research, c++, data]\n").
 
 test(printed_solution_is_a_full_assignment) :-
     main_lines(Lines),
@@ -270,9 +305,9 @@ test(candidate_rejects_wrong_name_order, [fail]) :-
 test(solve_has_a_solution) :-
     once(solve(_)).
 
-test(every_solution_satisfies_clues_1_to_8) :-
+test(every_solution_satisfies_clues_1_to_9) :-
     forall(solve(S),
-           forall(between(1, 8, N), assertion(clue(N, S)))).
+           forall(between(1, 9, N), assertion(clue(N, S)))).
 
 test(solutions_have_no_duplicates) :-
     findall(S, solve(S), Sols),
@@ -281,11 +316,120 @@ test(solutions_have_no_duplicates) :-
     length(Unique, Len).
 
 test(hand_checked_solution_is_found) :-
-    valid_solution(S),
+    unique_solution(S),
     assertion(solve(S)).
+
+test(other_clue_1_to_8_solutions_are_not_solved, [fail]) :-
+    ( valid_solution(S) ; third_solution(S) ),
+    solve(S).
 
 test(satisfies_clues_empty_list_accepts_any_candidate) :-
     pdf_layout_example(S),
     satisfies_clues([], S).
 
 :- end_tests(p1_solver).
+
+% ---------------------------------------------------------------------
+% count_solutions/2 (P1.b)
+% ---------------------------------------------------------------------
+
+:- begin_tests(p1_count).
+
+test(clues_1_to_8_give_three) :-
+    clues_1_to_8(Active),
+    count_solutions(Active, N),
+    assertion(N == 3).
+
+test(clues_1_to_9_give_one) :-
+    clues_1_to_9(Active),
+    count_solutions(Active, N),
+    assertion(N == 1).
+
+test(spec_query_with_bound_n) :-
+    count_solutions([1, 2, 3, 4, 5, 6, 7, 8, 9], 1).
+
+test(wrong_bound_n_fails, [fail]) :-
+    count_solutions([1, 2, 3, 4, 5, 6, 7, 8], 1).
+
+test(no_clues_counts_every_candidate) :-
+    count_solutions([], N),
+    assertion(N == 13824).
+
+test(order_of_active_does_not_matter) :-
+    count_solutions([8, 7, 6, 5, 4, 3, 2, 1], N),
+    assertion(N == 3).
+
+test(repeated_clue_numbers_do_not_change_count) :-
+    count_solutions([1, 1, 2, 3, 4, 5, 6, 7, 8, 8], N),
+    assertion(N == 3).
+
+test(clue_9_alone) :-
+    count_solutions([9], N),
+    assertion(N == 3456).
+
+test(dropping_one_clue_never_lowers_count) :-
+    clues_1_to_8(All),
+    forall(select(_, All, Rest),
+           ( count_solutions(Rest, N), assertion(N > 3) )).
+
+test(count_matches_findall_on_solve) :-
+    findall(S, solve(S), Sols),
+    length(Sols, Len),
+    count_solutions([1, 2, 3, 4, 5, 6, 7, 8, 9], N),
+    assertion(N == Len).
+
+test(count_solutions_is_deterministic) :-
+    count_solutions([1, 2, 3], _).
+
+:- end_tests(p1_count).
+
+% ---------------------------------------------------------------------
+% clue(9, Solution) (P1.c)
+% ---------------------------------------------------------------------
+
+:- begin_tests(p1_clue9).
+
+test(clue9_true_in_unique_solution) :-
+    unique_solution(S),
+    clue(9, S).
+
+test(clue9_false_in_solution_1, [fail]) :-
+    valid_solution(S),
+    clue(9, S).
+
+test(clue9_false_in_solution_3, [fail]) :-
+    third_solution(S),
+    clue(9, S).
+
+test(clue9_true_only_in_kept_clue_1_to_8_solution) :-
+    unique_solution(Kept),
+    clues_1_to_8(Active),
+    forall(( candidate(S), satisfies_clues(Active, S) ),
+           ( clue(9, S) -> assertion(S == Kept) ; true )).
+
+test(clue9_does_not_bind_solution) :-
+    unique_solution(S),
+    copy_term(S, Before),
+    clue(9, S),
+    assertion(S == Before).
+
+test(clue9_does_not_depend_on_names) :-
+    unique_solution(S),
+    findall(p(N2, D, L, P),
+            ( member(p(_, D, L, P), S), N2 = someone ),
+            Renamed),
+    assertion(clue(9, Renamed)).
+
+test(clue9_comment_directly_above_and_names_no_friend) :-
+    once(source_file(user:clue(_, _), File)),
+    setup_call_cleanup(open(File, read, In),
+                       read_string(In, _, Text),
+                       close(In)),
+    split_string(Text, "\n", "\r", Lines),
+    once(( append(_, [Comment, Clause | _], Lines),
+           sub_string(Comment, 0, _, _, "% CLUE 9:") )),
+    assertion(sub_string(Clause, 0, _, _, "clue(9,")),
+    forall(member(Name, ["Alex", "Ben", "Carla", "Dana"]),
+           assertion(\+ sub_string(Comment, _, _, _, Name))).
+
+:- end_tests(p1_clue9).

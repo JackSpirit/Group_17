@@ -23,7 +23,9 @@ which `satisfies_clues/2` holds for every clue number in `Active`, removes dupli
 | 2 | design, java, embedded | development, javascript, web | testing, python, AI | research, c++, data |
 | 3 | testing, python, embedded | development, javascript, web | design, java, AI | research, c++, data |
 
-`main/0` prints solution 1, because it is the first one the search finds.
+With clues 1 to 8 only, `main/0` would print solution 1, simply because it is the first
+one the search finds. After clue 9 was added (P1.c below), `main/0` prints solution 2,
+the only one left.
 
 ## What N = 3 tells us: clues 1 to 8 are under-constrained
 
@@ -74,4 +76,72 @@ Dropping any single clue from 1 to 8 increases the count, so no clue is redundan
 
 ## P1.c: ninth clue
 
-To be added.
+```prolog
+% CLUE 9: The friend whose favorite language is Python prefers the AI project.
+clue(9, Solution) :-
+    memberchk(p(_, _, python, Project), Solution),
+    Project == 'AI'.
+```
+
+```powershell
+swipl -q -f code/17_q1.pl -g "count_solutions([1,2,3,4,5,6,7,8,9], N), print(N), nl" -t halt
+```
+
+Result: **N = 1**. `solve/1` now checks clues 1 to 9, and `main/0` prints:
+
+```
+Alex = [design, java, embedded]
+Ben = [development, javascript, web]
+Carla = [testing, python, AI]
+Dana = [research, c++, data]
+```
+
+### Why clue 9 has to keep solution 2
+
+Clue 9 may not name a friend; it can only relate attribute values, as clue 5 does. So
+look at the three solutions with the names removed, as sets of (department, language,
+project) triples:
+
+| # | design + java | testing + python | research + c++ | development + javascript |
+|---|---|---|---|---|
+| 1 | AI | embedded | data | web |
+| 2 | **embedded** | **AI** | data | web |
+| 3 | AI | embedded | data | web |
+
+Solutions 1 and 3 contain exactly the same triples; they differ only in *who* holds
+which triple (in solution 1 Alex is the design friend and Dana the testing friend; in
+solution 3 Alex is the testing friend and Carla the design friend). Any clue that talks
+only about attribute values is therefore either true in both or false in both, so no
+allowed clue can keep one and drop the other. Solution 2 is the only one that can be made
+unique.
+
+### How clue 9 removes the other two
+
+Solution 2 is the only solution in which the AI project goes to the testing/python friend
+(and embedded to the design/java friend). Clue 9 states exactly that difference:
+
+| # | Python friend's project | Clue 9 |
+|---|---|---|
+| 1 | embedded (Dana) | false → removed |
+| 2 | AI (Carla) | **true → kept** |
+| 3 | embedded (Alex) | false → removed |
+
+So clue 9 is true in the solution we keep and false in every other solution of clues 1
+to 8, as P1.c requires. Equivalent wordings would be "the friend who works in testing
+prefers the AI project" or "the friend who likes Java prefers the embedded project".
+
+On its own, clue 9 is weak: `count_solutions([9], N)` gives N = 3,456 (a quarter of all
+13,824 candidates). It only singles out one answer in combination with clues 1 to 8,
+which had already narrowed the puzzle down to a choice between "AI with design" and
+"AI with testing".
+
+### Tests
+
+`tests/test_p1.pl` checks that:
+
+- `count_solutions/2` gives 3 for clues 1 to 8, 1 for clues 1 to 9 and 13,824 for no
+  clues, and that the order or repetition of clue numbers in `Active` does not matter;
+- clue 9 holds in solution 2 and fails in solutions 1 and 3, holds in no other solution
+  of clues 1 to 8, still holds when the names are replaced, and has its `% CLUE 9:`
+  comment directly above it with no friend's name;
+- `solve/1` has exactly one solution and `main/0` prints it in the required format.
