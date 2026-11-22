@@ -26,3 +26,8 @@
   (display (inorder-acc tree '())) (newline)
   (display (preorder-acc tree '())) (newline)
   (display (postorder-acc tree '())) (newline))
+
+(define (tree-height t)
+  (if (null? t)
+      0
+      (+ 1 (max (tree-height (cadr t)) (tree-height (caddr t))))))
