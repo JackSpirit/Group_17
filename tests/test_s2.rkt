@@ -95,3 +95,8 @@
 ;; expected: (x 10000 20000)   (last element)
 (display (last-element-of sublist-result))
 (newline)
+
+;;make-inserter
+
+(display ((make-inserter 'x (lambda (len) (< len 2))) '((1) (2 3) ()))) (newline) ; expect ((x 1) (2 3) (x))
+(display ((make-inserter 'x (lambda (len) (= len 0))) '((1) ()))) (newline)       ; expect ((1) (x))

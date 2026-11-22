@@ -61,3 +61,20 @@
     (display (insert-if-short x lst n))
     (newline)))
 
+;; (make-inserter x len-ok?) -> (lambda (lst) ...)
+;; x is any value; len-ok? is a one-argument function taking a number and
+;; returning a boolean. Returns a ONE-argument function of a datum lst.
+;; Recursive reading: the returned function gives an atom back unchanged;
+;; for a list (null or pair) it applies itself to every element, then
+;; conses x on the front of the result if (len-ok? original-length) is true.
+;; The length is taken from the original list, and x is never recursed into.
+(define (make-inserter x len-ok?)
+  (letrec ((insert
+            (lambda (lst)
+              (cond ((not (or (null? lst) (pair? lst))) lst)
+                    (else
+                     (let ((processed (my-map insert lst)))
+                       (if (len-ok? (my-length lst))
+                           (cons x processed)
+                           processed)))))))
+    insert))
