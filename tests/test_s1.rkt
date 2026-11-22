@@ -37,3 +37,17 @@
 (print-height-and-leaves t3)
 ;; expected: (0 0)
 (print-height-and-leaves '())
+
+;; ---- T4: edge cases ----
+;; expected: (5) / (5) / (5)
+(print-all-traversals t4)
+;; expected: (1 1)
+(print-height-and-leaves t4)
+;; expected: (1 2 3) / (3 2 1) / (1 2 3)
+(print-all-traversals t5)
+;; expected: (3 1)
+(print-height-and-leaves t5)
+;; expected: (2 1 4 3) / (1 2 3 4) / (2 4 3 1)
+(print-all-traversals t6)
+;; expected: (3 2)
+(print-height-and-leaves t6)
