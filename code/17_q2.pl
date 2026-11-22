@@ -105,3 +105,18 @@ equation(List, Equation) :-
 %  List has no valid equation, including when it has fewer than two numbers.
 generate_equation(List, Equation) :-
     once(equation(List, Equation)).
+
+%! all_equations(+List, -Equations) is det.
+%  Declarative reading: Equations is the list of every valid equation for
+%  List, each string once, in standard order of terms. It is [] when List
+%  has no valid equation (including lists of length 0 or 1).
+all_equations(List, Equations) :-
+    findall(Equation, equation(List, Equation), Found),
+    sort(Found, Equations).
+
+%! count_equations(+List, -N) is det.
+%  Declarative reading: N is the number of distinct valid equations for
+%  List, that is, the length of the list all_equations/2 gives.
+count_equations(List, N) :-
+    all_equations(List, Equations),
+    length(Equations, N).
