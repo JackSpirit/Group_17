@@ -35,18 +35,11 @@
 
 ;; (insert-if-short x lst n) -> any
 ;; x is any value, lst is any datum (list or atom), n is a number.
-;; Recursive reading: an atom is returned unchanged. A list (null or pair)
-;; has insert-if-short applied to each of its elements; then x is consed on
-;; the front of the result if the ORIGINAL length of the list is < n.
-;; x itself is never recursed into, since it is added after the mapping.
+;; Recursive reading: builds the inserter for x that accepts lengths < n,
+;; then applies it to lst; the recursion over nested lists lives in the
+;; function returned by make-inserter.
 (define (insert-if-short x lst n)
-  (cond ((not (or (null? lst) (pair? lst))) lst)
-        (else
-         (let ((processed
-                (my-map (lambda (e) (insert-if-short x e n)) lst)))
-           (if (< (my-length lst) n)
-               (cons x processed)
-               processed)))))
+  ((make-inserter x (lambda (len) (< len n))) lst))
 
 
 ;; (print-insert-result) -> prints one line
