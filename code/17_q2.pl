@@ -37,3 +37,47 @@ expr(Nums, op(Op, L, R), Value) :-
     expr(Right, R, RV),
     member(Op, [+, -, *, /]),
     apply_op(Op, LV, RV, Value).
+
+%! op_prec(?Op, ?Prec) is nondet.
+%  Declarative reading: Prec is the precedence of operator Op; * and / (2)
+%  bind tighter than + and - (1).
+op_prec(+, 1).
+op_prec(-, 1).
+op_prec(*, 2).
+op_prec(/, 2).
+
+%! needs_parens(+Side, +ChildPrec, +ParentPrec) is semidet.
+%  Declarative reading: an operand on Side whose top operator has precedence
+%  ChildPrec is parenthesised under a parent of precedence ParentPrec. A left
+%  operand needs them only when ChildPrec is lower; a right operand needs
+%  them when ChildPrec is the same or lower (operators are left-associative).
+needs_parens(left, ChildPrec, ParentPrec) :- ChildPrec < ParentPrec.
+needs_parens(right, ChildPrec, ParentPrec) :- ChildPrec =< ParentPrec.
+
+%! tree_string(+Tree, -String) is det.
+%  Declarative reading: String is the canonical text of Tree, with no spaces:
+%  a number is written in decimal, and op(Op, L, R) is the text of L, then
+%  Op, then the text of R, each operand in parentheses exactly when
+%  needs_parens/3 says so. Different trees give different strings.
+tree_string(num(N), String) :-
+    number_string(N, String).
+tree_string(op(Op, L, R), String) :-
+    op_prec(Op, Prec),
+    operand_string(left, L, Prec, LS),
+    operand_string(right, R, Prec, RS),
+    atomics_to_string([LS, Op, RS], String).
+
+%! operand_string(+Side, +Tree, +ParentPrec, -String) is det.
+%  Declarative reading: String is the text of Tree used as the Side operand
+%  of a parent with precedence ParentPrec. A single number is never in
+%  parentheses; an op/3 tree is wrapped in "(" ")" exactly when
+%  needs_parens/3 holds for its top operator.
+operand_string(_, num(N), _, String) :-
+    tree_string(num(N), String).
+operand_string(Side, op(Op, L, R), ParentPrec, String) :-
+    op_prec(Op, Prec),
+    tree_string(op(Op, L, R), Inner),
+    (   needs_parens(Side, Prec, ParentPrec)
+    ->  atomics_to_string(['(', Inner, ')'], String)
+    ;   String = Inner
+    ).
