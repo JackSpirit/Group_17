@@ -90,6 +90,18 @@ candidate([ p('Alex',  Dept1, Lang1, Proj1),
 satisfies_clues(Active, Solution) :-
     forall(member(N, Active), clue(N, Solution)).
 
+%! count_solutions(+Active, -N) is det.
+%  Declarative reading: N is the number of distinct candidate Solutions in
+%  which every clue whose number is in Active holds; clues not in Active
+%  are ignored. sort/2 removes duplicate solutions before counting.
+count_solutions(Active, N) :-
+    findall(Solution,
+            ( candidate(Solution),
+              satisfies_clues(Active, Solution) ),
+            Solutions),
+    sort(Solutions, Distinct),
+    length(Distinct, N).
+
 %! solve(-Solution) is nondet.
 %  Declarative reading: Solution is a solution of the puzzle when it is a
 %  candidate and clues 1 to 8 all hold in it.
