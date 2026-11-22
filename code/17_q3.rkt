@@ -10,3 +10,8 @@
   (display (inorder-acc tree '()))
   (newline))
 
+;; empty -> acc; else node :: preorder(left, preorder(right, acc))
+(define (preorder-acc t acc)
+  (if (null? t)
+      acc
+      (cons (car t) (preorder-acc (cadr t) (preorder-acc (caddr t) acc)))))
