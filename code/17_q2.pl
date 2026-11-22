@@ -81,3 +81,27 @@ operand_string(Side, op(Op, L, R), ParentPrec, String) :-
     ->  atomics_to_string(['(', Inner, ')'], String)
     ;   String = Inner
     ).
+
+%! equation(+List, -Equation) is nondet.
+%  Declarative reading: Equation is the string "L=R" where List splits into
+%  two non-empty parts Left and Right, L is the text of an expression tree
+%  over Left, R is the text of an expression tree over Right, and both
+%  trees have the same integer value. Fails for lists of length 0 or 1,
+%  since no split gives two non-empty parts.
+equation(List, Equation) :-
+    Left = [_|_],
+    Right = [_|_],
+    append(Left, Right, List),
+    expr(Left, LTree, Value),
+    expr(Right, RTree, RValue),
+    Value =:= RValue,
+    tree_string(LTree, LS),
+    tree_string(RTree, RS),
+    atomics_to_string([LS, '=', RS], Equation).
+
+%! generate_equation(+List, ?Equation) is semidet.
+%  Declarative reading: Equation is one valid equation for List (the first
+%  one equation/2 finds). Fails, without looping or raising an error, when
+%  List has no valid equation, including when it has fewer than two numbers.
+generate_equation(List, Equation) :-
+    once(equation(List, Equation)).
