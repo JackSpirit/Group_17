@@ -7,3 +7,13 @@
 (define t4 '(5 () ()))
 (define t5 '(3 (2 (1 () ()) ()) ()))
 (define t6 '(1 (2 () ()) (3 (4 () ()) ())))
+
+;; ---- T1: print-inorder ----
+;; expected: (1 2 3 4 5 6 7)
+(print-inorder t1)
+;; expected: (1 2 3)
+(print-inorder t2)
+;; expected: (b a c)
+(print-inorder t3)
+;; expected: ()
+(print-inorder '())
