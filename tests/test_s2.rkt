@@ -11,3 +11,11 @@
 (display (my-map (lambda (x) (+ x 1)) '(1 2 3))) (newline)    ; expect (2 3 4)
 (display (my-map (lambda (x) x) '(a (b) ()))) (newline)       ; expect (a (b) ())
 (display (my-reverse '(1 2 3))) (newline)                     ; expect (3 2 1)
+
+
+;; insert-if-short
+(display (insert-if-short 42 '((1 2) (3 4 5) (6) ()) 3)) (newline)  ; expect ((42 1 2) (3 4 5) (42 6) (42))
+(display (insert-if-short 0 '(((1) 2) (3) ((4 5 6) ())) 3)) (newline) ; expect ((0 (0 1) 2) (0 3) (0 (4 5 6) (0)))
+(display (insert-if-short 7 '() 3)) (newline)                        ; expect (7)
+(display (insert-if-short 7 '() 0)) (newline)                        ; expect ()
+(display (insert-if-short 7 '((())) 2)) (newline)                    ; expect (7 (7 (7)))
