@@ -5,3 +5,8 @@
   (if (null? t)
       acc
       (inorder-acc (cadr t) (cons (car t) (inorder-acc (caddr t) acc)))))
+
+(define (print-inorder tree)
+  (display (inorder-acc tree '()))
+  (newline))
+
