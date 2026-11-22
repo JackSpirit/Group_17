@@ -15,3 +15,9 @@
   (if (null? t)
       acc
       (cons (car t) (preorder-acc (cadr t) (preorder-acc (caddr t) acc)))))
+
+;; empty -> acc; else postorder(left, postorder(right, node :: acc))
+(define (postorder-acc t acc)
+  (if (null? t)
+      acc
+      (postorder-acc (cadr t) (postorder-acc (caddr t) (cons (car t) acc)))))
