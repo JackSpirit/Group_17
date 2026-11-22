@@ -17,3 +17,23 @@
 (print-inorder t3)
 ;; expected: ()
 (print-inorder '())
+
+;; ---- T2: print-all-traversals ----
+;; expected: (1 2 3 4 5 6 7) / (4 2 1 3 6 5 7) / (1 3 2 5 7 6 4)
+(print-all-traversals t1)
+;; expected: (1 2 3) / (1 2 3) / (3 2 1)
+(print-all-traversals t2)
+;; expected: (b a c) / (a b c) / (b c a)
+(print-all-traversals t3)
+;; expected: () / () / ()
+(print-all-traversals '())
+
+;; ---- T3: print-height-and-leaves ----
+;; expected: (3 4)
+(print-height-and-leaves t1)
+;; expected: (3 1)
+(print-height-and-leaves t2)
+;; expected: (2 2)
+(print-height-and-leaves t3)
+;; expected: (0 0)
+(print-height-and-leaves '())
